@@ -64,11 +64,11 @@ namespace SubmersedVR
         {
             get
             {
-                if (laserPointer == null)
+                if (laserPointerLeft == null)
                 {
                     return null;
                 }
-                return laserPointer.eventCamera;
+                return laserPointerLeft.eventCamera;
             }
         }
 
@@ -89,13 +89,13 @@ namespace SubmersedVR
             {
                 _targetTransform = value;
                 value.Apply(laserPointerUI.transform);
-                value.Apply(laserPointer.transform);
+                value.Apply(laserPointerLeft.transform);
             }
         }
 
         public static Transform GetTargetTansform()
         {
-            return VRCameraRig.instance.laserPointer.transform;
+            return VRCameraRig.instance.laserPointerLeft.transform;
         }
 
         public void SetCameraTrackTarget(Transform target)
@@ -121,24 +121,24 @@ namespace SubmersedVR
             rightController.SetActive(true);
 
             leftHandTarget = new GameObject(nameof(leftHandTarget)).WithParent(leftController);
-            rightHandTarget = new GameObject(nameof(rightHandTarget)).WithParent(rightController);
             leftHandTarget.transform.localEulerAngles = new Vector3(270, 90, 0);
-            Vector3 handOffset = new Vector3(90, 270, 0);
-            rightHandTarget.transform.localEulerAngles = handOffset;
+            rightHandTarget = new GameObject(nameof(rightHandTarget)).WithParent(rightController);
+            rightHandTarget.transform.localEulerAngles = new Vector3(90, 270, 0);
 
             // Laser Pointer Setup
             laserPointer = new GameObject(nameof(laserPointer)).WithParent(rightController.transform).AddComponent<LaserPointer>();
-            laserPointerLeft = new GameObject(nameof(laserPointerLeft)).WithParent(leftController.transform).AddComponent<LaserPointer>();
-            laserPointerLeft.gameObject.SetActive(false);
-            // laserPointer.gameObject.SetActive(false);
+            laserPointer.gameObject.SetActive(false);
             laserPointer.disableAfterCreation = true;
+            laserPointerLeft = new GameObject(nameof(laserPointerLeft)).WithParent(leftController.transform).AddComponent<LaserPointer>();
+            // laserPointerLeft.gameObject.SetActive(false);
+            laserPointerLeft.disableAfterCreation = true;
 
             // NOTE: These laserpointer and controllers is NOT parented to the Rig, since they act in UI space, not world space
             uiRig = new GameObject(nameof(uiRig));
             Object.DontDestroyOnLoad(uiRig);
             leftControllerUI = new GameObject(nameof(leftControllerUI)).WithParent(uiRig.transform);
             rightControllerUI = new GameObject(nameof(rightControllerUI)).WithParent(uiRig.transform);
-            laserPointerUI = new GameObject(nameof(laserPointerUI)).WithParent(rightControllerUI.transform).AddComponent<LaserPointer>();
+            laserPointerUI = new GameObject(nameof(laserPointerUI)).WithParent(leftControllerUI.transform).AddComponent<LaserPointer>();
             // TODO: Constructors possible?
             laserPointerUI.doWorldRaycasts = true;
             laserPointerUI.useUILayer = true;
@@ -272,7 +272,7 @@ namespace SubmersedVR
                 camera.transform.localRotation = Quaternion.identity;
             }
             uiCamera = camera;
-            VRHud.Setup(uiCamera, rightControllerUI.transform);
+            VRHud.Setup(uiCamera, leftControllerUI.transform);
         }
 
         void SetupPDA()
