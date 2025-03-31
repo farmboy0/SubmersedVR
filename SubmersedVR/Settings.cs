@@ -32,6 +32,9 @@ namespace SubmersedVR
         //public static bool AlwaysShowLaserPointer;
         //public static event BooleanChanged AlwaysShowLaserPointerChanged;
 
+        public static bool LeftHandAsMainHand;
+        public static event BooleanChanged LeftHandAsMainHandChanged;
+
         public static bool PutHandReticleOnLaserPointer;
         public static event BooleanChanged PutHandReticleOnLaserPointerChanged;
 
@@ -125,7 +128,7 @@ namespace SubmersedVR
             });
 
             panel.AddHeading(tab, "Immersion");
-            panel.AddToggleOption(tab, "Put survival meter on left wrist", PutBarsOnWrist, (value) => { PutBarsOnWrist = value; PutBarsOnWristChanged(value); });
+            panel.AddToggleOption(tab, "Put survival meter on off-hand wrist", PutBarsOnWrist, (value) => { PutBarsOnWrist = value; PutBarsOnWristChanged(value); });
             panel.AddToggleOption(tab, "Articulated Hands", ArticulatedHands, (value) => { ArticulatedHands = value; }, "Hands animate based on the movement of your physical hands.");
             panel.AddToggleOption(tab, "Enable Game Haptics(WIP)", AreGameHapticsEnabled, (value) => { AreGameHapticsEnabled = value; }, "Enable controller vibration while interacting with world objects.");
             panel.AddToggleOption(tab, "Enable UI Haptics(WIP)", AreUIHapticsEnabled, (value) => { AreUIHapticsEnabled = value; }, "Enable controller vibration while interacting with the User Interface.");
@@ -135,6 +138,7 @@ namespace SubmersedVR
             });
 
             panel.AddHeading(tab, "Experimental");
+            panel.AddToggleOption(tab, "Enable left-handed Mode", LeftHandAsMainHand, (value) => { LeftHandAsMainHand = value; LeftHandAsMainHandChanged(value); });
             panel.AddToggleOption(tab, "Put hand reticle on laserpointer end", PutHandReticleOnLaserPointer, (value) => { PutHandReticleOnLaserPointer = value; PutHandReticleOnLaserPointerChanged(value); });
             panel.AddToggleOption(tab, "Invert Y Axis in Seamoth/Cameras", InvertYAxis, (value) => { InvertYAxis = value; InvertYAxisChanged(value); }, "Enables Y axis inversion for Seamoth and Cameras.");
             //panel.AddToggleOption(tab, "Enable Particle Fix", EnableParticleFix, (value) => { EnableParticleFix = value; }, "Enables Particle Optimizations.");

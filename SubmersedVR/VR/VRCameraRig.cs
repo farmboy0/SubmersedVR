@@ -25,7 +25,9 @@ namespace SubmersedVR
         // Setup and created in Start()
         public Camera vrCamera;
         public GameObject leftController;
+        public SteamVR_Behaviour_Pose leftControllerPose;
         public GameObject rightController;
+        public SteamVR_Behaviour_Pose rightControllerPose;
         // Those are used for the IK/Hands
         public GameObject leftHandTarget;
         public GameObject rightHandTarget;
@@ -37,7 +39,9 @@ namespace SubmersedVR
 
         public GameObject uiRig;
         public GameObject leftControllerUI;
+        public SteamVR_Behaviour_Pose leftControllerUIPose;
         public GameObject rightControllerUI;
+        public SteamVR_Behaviour_Pose rightControllerUIPose;
         public LaserPointer laserPointerUI;
 
         public GameObject modelL;
@@ -115,16 +119,10 @@ namespace SubmersedVR
             leftController = new GameObject(nameof(leftController)).WithParent(transform);
             rightController = new GameObject(nameof(rightController)).WithParent(transform);
 
-            leftController.SetActive(false);
-            rightController.SetActive(false);
-            var controller = leftController.AddComponent<SteamVRRef.Valve.VR.SteamVR_Behaviour_Pose>();
-            controller.inputSource = SteamVRRef.Valve.VR.SteamVR_Input_Sources.LeftHand;
-            controller.poseAction = SteamVRActions.Valve.VR.SteamVR_Actions.subnautica_LeftHandPose;
-            controller = rightController.AddComponent<SteamVRRef.Valve.VR.SteamVR_Behaviour_Pose>();
-            controller.inputSource = SteamVRRef.Valve.VR.SteamVR_Input_Sources.RightHand;
-            controller.poseAction = SteamVRActions.Valve.VR.SteamVR_Actions.subnautica_RightHandPose;
-            leftController.SetActive(true);
-            rightController.SetActive(true);
+            leftControllerPose = leftController.AddComponent<SteamVR_Behaviour_Pose>();
+            rightControllerPose = rightController.AddComponent<SteamVR_Behaviour_Pose>();
+
+            SetupControllerPoses(true);
 
             leftHandTarget = new GameObject(nameof(leftHandTarget)).WithParent(leftController);
             rightHandTarget = new GameObject(nameof(rightHandTarget)).WithParent(rightController);
@@ -142,23 +140,20 @@ namespace SubmersedVR
             // NOTE: These laserpointer and controllers is NOT parented to the Rig, since they act in UI space, not world space
             uiRig = new GameObject(nameof(uiRig));
             Object.DontDestroyOnLoad(uiRig);
+
             leftControllerUI = new GameObject(nameof(leftControllerUI)).WithParent(uiRig.transform);
             rightControllerUI = new GameObject(nameof(rightControllerUI)).WithParent(uiRig.transform);
+
             laserPointerUI = new GameObject(nameof(laserPointerUI)).WithParent(rightControllerUI.transform).AddComponent<LaserPointer>();
             // TODO: Constructors possible?
             laserPointerUI.doWorldRaycasts = true;
             laserPointerUI.useUILayer = true;
 
-            leftControllerUI.SetActive(false);
-            rightControllerUI.SetActive(false);
-            controller = leftControllerUI.AddComponent<SteamVRRef.Valve.VR.SteamVR_Behaviour_Pose>();
-            controller.inputSource = SteamVRRef.Valve.VR.SteamVR_Input_Sources.LeftHand;
-            controller.poseAction = SteamVRActions.Valve.VR.SteamVR_Actions.subnautica_LeftHandPose;
-            controller = rightControllerUI.AddComponent<SteamVRRef.Valve.VR.SteamVR_Behaviour_Pose>();
-            controller.inputSource = SteamVRRef.Valve.VR.SteamVR_Input_Sources.RightHand;
-            controller.poseAction = SteamVRActions.Valve.VR.SteamVR_Actions.subnautica_RightHandPose;
-            leftControllerUI.SetActive(true);
-            rightControllerUI.SetActive(true);
+            leftControllerUIPose = leftControllerUI.AddComponent<SteamVR_Behaviour_Pose>();
+            rightControllerUIPose = rightControllerUI.AddComponent<SteamVR_Behaviour_Pose>();
+
+            SetupControllerUIPoses(true);
+
             TargetTransform = DefaultTargetTransform;
 
             SetupControllerModels();
@@ -182,6 +177,10 @@ namespace SubmersedVR
         {
             Settings.AmbientOcclusionSettingsChanged -= OnAmbientOcclusionSettingsChanged;
             Settings.AmbientOcclusionSettingsChanged += OnAmbientOcclusionSettingsChanged;
+            Settings.LeftHandAsMainHandChanged -= SetupControllerPoses;
+            Settings.LeftHandAsMainHandChanged += SetupControllerPoses;
+            Settings.LeftHandAsMainHandChanged -= SetupControllerUIPoses;
+            Settings.LeftHandAsMainHandChanged += SetupControllerUIPoses;
 
             SetupControllers();
             StartCoroutine(DelayedRecenter(1.0f));
@@ -191,6 +190,54 @@ namespace SubmersedVR
         {
             yield return new WaitForSeconds(delay);
             VRUtil.Recenter();
+        }
+
+        private void SetupControllerPoses(bool _)
+        {
+            leftController.SetActive(false);
+            rightController.SetActive(false);
+
+            if (Settings.LeftHandAsMainHand)
+            {
+                leftControllerPose.inputSource = SteamVRRef.Valve.VR.SteamVR_Input_Sources.RightHand;
+                leftControllerPose.poseAction = SteamVRActions.Valve.VR.SteamVR_Actions.subnautica_RightHandPose;
+                rightControllerPose.inputSource = SteamVRRef.Valve.VR.SteamVR_Input_Sources.LeftHand;
+                rightControllerPose.poseAction = SteamVRActions.Valve.VR.SteamVR_Actions.subnautica_LeftHandPose;
+            }
+            else
+            {
+                leftControllerPose.inputSource = SteamVRRef.Valve.VR.SteamVR_Input_Sources.LeftHand;
+                leftControllerPose.poseAction = SteamVRActions.Valve.VR.SteamVR_Actions.subnautica_LeftHandPose;
+                rightControllerPose.inputSource = SteamVRRef.Valve.VR.SteamVR_Input_Sources.RightHand;
+                rightControllerPose.poseAction = SteamVRActions.Valve.VR.SteamVR_Actions.subnautica_RightHandPose;
+            }
+
+            leftController.SetActive(true);
+            rightController.SetActive(true);
+        }
+
+        private void SetupControllerUIPoses(bool _)
+        {
+            leftControllerUI.SetActive(false);
+            rightControllerUI.SetActive(false);
+
+            if (Settings.LeftHandAsMainHand)
+            {
+                leftControllerUIPose.inputSource = SteamVRRef.Valve.VR.SteamVR_Input_Sources.RightHand;
+                leftControllerUIPose.poseAction = SteamVRActions.Valve.VR.SteamVR_Actions.subnautica_RightHandPose;
+                rightControllerUIPose.inputSource = SteamVRRef.Valve.VR.SteamVR_Input_Sources.LeftHand;
+                rightControllerUIPose.poseAction = SteamVRActions.Valve.VR.SteamVR_Actions.subnautica_LeftHandPose;
+            }
+            else
+            {
+                leftControllerUIPose.inputSource = SteamVRRef.Valve.VR.SteamVR_Input_Sources.LeftHand;
+                leftControllerUIPose.poseAction = SteamVRActions.Valve.VR.SteamVR_Actions.subnautica_LeftHandPose;
+                rightControllerUIPose.inputSource = SteamVRRef.Valve.VR.SteamVR_Input_Sources.RightHand;
+                rightControllerUIPose.poseAction = SteamVRActions.Valve.VR.SteamVR_Actions.subnautica_RightHandPose;
+            }
+
+            leftControllerUI.SetActive(true);
+            rightControllerUI.SetActive(true);
         }
 
         private void SetupControllerModels()
