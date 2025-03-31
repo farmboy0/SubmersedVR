@@ -1,4 +1,4 @@
-﻿using HarmonyLib;
+using HarmonyLib;
 using UnityEngine;
 using FMODUnity;
 // Taken from https://github.com/IWhoI/SubnauticaVREnhancements/blob/master/VREnhancements/AudioFix.cs

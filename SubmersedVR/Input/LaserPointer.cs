@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 namespace SubmersedVR
 {
     // Creates a laser pointer 
